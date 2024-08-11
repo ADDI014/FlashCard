@@ -1,66 +1,50 @@
+require('dotenv').config();
+
 const express = require('express');
-const mysql = require('mysql2');
+const mongoose = require('mongoose');
 const cors = require('cors');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'Ankit@132asdf',
-    database: 'flashcardDB'
+// Correct MongoDB URI
+const mongoURI = process.env.MONGODB_URI || 'mongodb+srv://ADDI014:Ankit123@flashcard.qvkcl.mongodb.net/?retryWrites=true&w=majority&appName=FlashCard';
+
+mongoose.connect(mongoURI)
+    .then(() => console.log('Connected to MongoDB Atlas'))
+    .catch(err => console.error('Failed to connect to MongoDB Atlas:', err));
+
+// Define the Flashcard schema
+const flashcardSchema = new mongoose.Schema({
+    question: String,
+    answer: String,
 });
 
-db.connect(err => {
-    if (err) {
-        console.error('Error connecting to the database:', err);
-    } else {
-        console.log('Connected to the database');
+// Create a model based on the schema
+const Flashcard = mongoose.model('Flashcard', flashcardSchema);
+
+// Define routes
+app.get('/flashcards', async (req, res) => {
+    try {
+        const flashcards = await Flashcard.find();
+        res.json(flashcards);
+    } catch (err) {
+        res.status(500).send(err);
     }
 });
 
-// Get all flashcards
-app.get('/flashcards', (req, res) => {
-    const query = 'SELECT * FROM flashcards';
-    db.query(query, (err, results) => {
-        if (err) return res.status(500).send(err);
-        res.json(results);
-    });
+app.post('/flashcards', async (req, res) => {
+    try {
+        const newFlashcard = new Flashcard(req.body);
+        await newFlashcard.save();
+        res.json(newFlashcard);
+    } catch (err) {
+        res.status(500).send(err);
+    }
 });
 
-// Add a new flashcard
-app.post('/flashcards', (req, res) => {
-    const { question, answer } = req.body;
-    const query = 'INSERT INTO flashcards (question, answer) VALUES (?, ?)';
-    db.query(query, [question, answer], (err, result) => {
-        if (err) return res.status(500).send(err);
-        res.json({ id: result.insertId });
-    });
-});
-
-// Update a flashcard
-app.put('/flashcards/:id', (req, res) => {
-    const { id } = req.params;
-    const { question, answer } = req.body;
-    const query = 'UPDATE flashcards SET question = ?, answer = ? WHERE id = ?';
-    db.query(query, [question, answer, id], (err) => {
-        if (err) return res.status(500).send(err);
-        res.send('Flashcard updated');
-    });
-});
-
-// Delete a flashcard
-app.delete('/flashcards/:id', (req, res) => {
-    const { id } = req.params;
-    const query = 'DELETE FROM flashcards WHERE id = ?';
-    db.query(query, [id], (err) => {
-        if (err) return res.status(500).send(err);
-        res.send('Flashcard deleted');
-    });
-});
-
+// Start server
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
 });

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom'; 
 import axios from 'axios';
 import './Dashboard.css';
 
@@ -8,7 +8,7 @@ const Dashboard = () => {
     const [newFlashcard, setNewFlashcard] = useState({ question: '', answer: '' });
     const [editMode, setEditMode] = useState(false);
     const [editFlashcardId, setEditFlashcardId] = useState(null);
-    const navigate = useNavigate(); // Initialize navigate
+    const navigate = useNavigate();
 
     useEffect(() => {
         axios.get('http://localhost:3000/flashcards')
