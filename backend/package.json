@@ -15,5 +15,8 @@
     "express": "^4.19.2",
     "mongoose": "^8.5.2",
     "mysql2": "^3.11.0"
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
   }
 }
